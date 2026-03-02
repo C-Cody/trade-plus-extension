@@ -4,11 +4,12 @@ Small browser extension (Chrome + Firefox) that replaces Roblox trade send/count
 
 Includes values display pulled from Rolimons, search history, ordering items by Value/RAP/Name, offer totals/difference, and viewing more items in one page.
 
-Created by Cody/hosted by Billabob on Chrome for convenience
-
-Firefox extension page: 
-Chome extension page: 
+Firefox extension page: https://addons.mozilla.org/en-US/firefox/addon/trade-plus-for-roblox/
+Chome extension page: (pending)
+Github: https://github.com/C-Cody/trade-plus-extension
 Discord server: https://discord.gg/6Ju3qYdnAp
+
+Created by Cody (tinycatsocks)/hosted by Billabob on Chrome for convenience
 
 #### Technical details
 

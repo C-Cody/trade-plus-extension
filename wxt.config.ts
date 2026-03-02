@@ -57,9 +57,9 @@ export default defineConfig({
         startUrls: ["https://www.roblox.com/users/261/trade"],
     },
     manifest: ({ manifestVersion }) => ({
-        name: "Trade Plus",
+        name: "Trade Plus for Roblox",
         description: "Replaces Roblox trade page with an improved one.",
-        version: "0.1.0",
+        version: "0.1.1",
         icons: ICONS,
         ...(manifestVersion === 3
             ? {
