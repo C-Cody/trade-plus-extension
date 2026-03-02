@@ -1,0 +1,45 @@
+html[data-trade-plus-active="true"],
+html[data-trade-plus-active="true"] body {
+  overflow: hidden !important;
+  height: 100% !important;
+}
+
+html[data-trade-plus-active="true"] body > *:not(#trade-plus-root) {
+  display: none !important;
+}
+
+#trade-plus-root {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+@media (max-width: 960px) {
+  #trade-plus-root {
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: #3a4561 #121a2a;
+  }
+
+  #trade-plus-root::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  #trade-plus-root::-webkit-scrollbar-track {
+    background: #121a2a;
+  }
+
+  #trade-plus-root::-webkit-scrollbar-thumb {
+    background: #3a4561;
+    border-radius: 8px;
+    border: 1px solid #121a2a;
+  }
+
+  #trade-plus-root::-webkit-scrollbar-thumb:hover {
+    background: #4a5678;
+  }
+}

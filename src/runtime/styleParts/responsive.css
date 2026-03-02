@@ -1,0 +1,55 @@
+@media (max-width: 960px) {
+  .tp-shell {
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+    padding-bottom: 0;
+  }
+
+  .tp-layout {
+    grid-template-columns: 1fr;
+    height: auto;
+    min-height: auto;
+    overflow: visible;
+  }
+
+  .tp-stage {
+    order: -1;
+    height: auto;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .tp-panel {
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  .tp-panel--inventory {
+    max-height: 72vh;
+    overflow: hidden;
+  }
+
+  .tp-panel--inventory .tp-item-grid {
+    flex: 1;
+    min-height: 0;
+  }
+
+  .tp-panel--inventory .tp-item-grid.tp-item-grid--scrollable {
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 3px;
+  }
+}
+
+@media (max-width: 760px) {
+  .tp-shell {
+    padding: 12px;
+    --tp-grid-min-size: 69px;
+  }
+
+  .tp-panel h2 {
+    font-size: 18px;
+  }
+}
