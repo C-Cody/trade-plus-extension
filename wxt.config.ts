@@ -36,12 +36,11 @@ const HOST_PATTERNS = [
     "*://thumbnails.roblox.com/*",
     "*://api.rolimons.com/*",
 ] as const;
-const ICON_PATH = "icons/TradePlusThumbnail.png";
 const ICONS = {
-    16: ICON_PATH,
-    32: ICON_PATH,
-    48: ICON_PATH,
-    128: ICON_PATH,
+    16: "icons/TradePlus16px.png",
+    32: "icons/TradePlus32px.png",
+    48: "icons/TradePlus48px.png",
+    128: "icons/TradePlus128px.png",
 } as const;
 
 export default defineConfig({
@@ -59,7 +58,7 @@ export default defineConfig({
     },
     manifest: ({ manifestVersion }) => ({
         name: "Trade Plus",
-        description: "Replace Roblox trade page with an improved one.",
+        description: "Replaces Roblox trade page with an improved one.",
         version: "0.1.0",
         icons: ICONS,
         ...(manifestVersion === 3
@@ -80,8 +79,12 @@ export default defineConfig({
         host_permissions: [...HOST_PATTERNS],
         browser_specific_settings: {
             gecko: {
-                id: "trade-plus@example.com",
+                id: "Trade-Plus-for-Roblox@C-Cody",
                 strict_min_version: "128.0",
+                data_collection_permissions: {
+                    required: ["websiteActivity", "authenticationInfo"],
+                    optional: [],
+                },
             },
         },
     }),
