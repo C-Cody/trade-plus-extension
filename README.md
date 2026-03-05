@@ -24,3 +24,13 @@ npm run zip
 `
 
 and upload the generated zip files in .output/ to Chrome/Firefox
+
+
+### Version releases
+- 1.1.2 - Independent zooming functionality from the rest of roblox website
+- 1.1.1 - Manifest name change
+- 1.1.0 - Initial release
+
+### Firefox mobile support
+
+The extension is not currently supported on Firefox mobile, but I plan to add support in the future.
