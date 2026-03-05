@@ -1,5 +1,4 @@
 ## Trade Plus for Roblox Extension
-
 Small browser extension (Chrome + Firefox) that replaces Roblox trade send/counter page with a page with much better navigation.
 
 Includes values display pulled from Rolimons, search history, ordering items by Value/RAP/Name, offer totals/difference, and viewing more items in one page.
@@ -12,7 +11,6 @@ Includes values display pulled from Rolimons, search history, ordering items by 
 Created by Cody (tinycatsocks)/hosted by Billabob on Chrome for convenience
 
 ### Technical details
-
 Changes the pages on the following URLs:
 - `https://www.roblox.com/users/{userId}/trade`
 - `https://www.roblox.com/trades/{tradeId}/counter`
@@ -32,5 +30,12 @@ and upload the generated zip files in .output/ to Chrome/Firefox
 - 1.1.0 - Initial release
 
 ### Firefox mobile support
-
 The extension is not currently supported on Firefox mobile, but I plan to add support in the future.
+
+### Screenshots
+
+![screenshot1.png](public%2Fscreenshots%2Fscreenshot1.png)
+
+![screenshot2.png](public%2Fscreenshots%2Fscreenshot2.png)
+
+![screenshot3.png](public%2Fscreenshots%2Fscreenshot3.png)
