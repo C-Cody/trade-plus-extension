@@ -59,7 +59,7 @@ export default defineConfig({
     manifest: ({ manifestVersion }) => ({
         name: "Trade Plus for Roblox",
         description: "Replaces Roblox trade page with an improved one.",
-        version: "0.1.1",
+        version: "0.1.2",
         icons: ICONS,
         ...(manifestVersion === 3
             ? {
@@ -74,8 +74,8 @@ export default defineConfig({
               }),
         permissions:
             manifestVersion === 2
-                ? ["storage", ...HOST_PATTERNS]
-                : ["storage"],
+                ? ["storage", "tabs", ...HOST_PATTERNS]
+                : ["storage", "tabs"],
         host_permissions: [...HOST_PATTERNS],
         browser_specific_settings: {
             gecko: {

@@ -1,6 +1,10 @@
-﻿import { createRoot, type Root } from "react-dom/client";
+import { createRoot, type Root } from "react-dom/client";
 import { defineContentScript } from "wxt/utils/define-content-script";
 import { TradePlusApp } from "../src/TradePlusApp";
+import {
+    SYNC_EXTENSION_ROUTE_ZOOM_MESSAGE,
+    type SyncExtensionRouteZoomMessage,
+} from "../src/constants/runtimeMessages";
 import { observeSpaNavigation } from "../src/runtime/navigation";
 import { PAGE_STYLE_CSS, SHADOW_CSS } from "../src/runtime/styles";
 import { targetFromUrl } from "../src/routes";
@@ -115,8 +119,24 @@ function unmount() {
     host = null;
 }
 
+function syncZoomContext(extensionRouteActive: boolean) {
+    const zoomSyncMessage: SyncExtensionRouteZoomMessage = {
+        type: SYNC_EXTENSION_ROUTE_ZOOM_MESSAGE,
+        extensionRouteActive,
+    };
+
+    try {
+        chrome.runtime.sendMessage(zoomSyncMessage);
+    } catch {
+        // Ignore message failures while extension reloads.
+    }
+}
+
 function syncRoute() {
     const target = targetFromUrl(window.location.href);
+    const extensionRouteActive = target !== null;
+
+    syncZoomContext(extensionRouteActive);
 
     if (!target) {
         unmount();
