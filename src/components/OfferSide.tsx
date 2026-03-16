@@ -69,6 +69,20 @@ export function OfferSide({
                                 ) : (
                                     <span>{"\u274C"}</span>
                                 )}
+                                {typeof item.serialNumber === "number" ? (
+                                    <span className="tp-offer-corner-badge tp-offer-corner-badge--serial">
+                                        {`#${item.serialNumber}`}
+                                    </span>
+                                ) : null}
+                                {item.projected ? (
+                                    <span
+                                        className="tp-offer-corner-badge tp-offer-corner-badge--projected"
+                                        title="Projected"
+                                        aria-label="Projected item"
+                                    >
+                                        {"\u26A0\uFE0F"}
+                                    </span>
+                                ) : null}
                                 <span className="tp-offer-remove-overlay">
                                     {"\u274C"}
                                 </span>
@@ -78,11 +92,6 @@ export function OfferSide({
                                     <span className="tp-offer-item-name">
                                         {item.name}
                                     </span>
-                                    {typeof item.serialNumber === "number" ? (
-                                        <span className="tp-offer-item-serial">
-                                            {`#${item.serialNumber}`}
-                                        </span>
-                                    ) : null}
                                 </span>
                                 <span className="tp-offer-item-prices">
                                     <span className="tp-offer-item-rap tp-robux-inline">

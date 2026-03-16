@@ -107,6 +107,37 @@
   display: block;
 }
 
+.tp-offer-corner-badge {
+  position: absolute;
+  bottom: 3px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  line-height: 1;
+  font-weight: 500;
+  z-index: 2;
+}
+
+.tp-offer-corner-badge--serial {
+  left: 3px;
+  border: 1px solid #3d4b6b;
+  background: #1d2537;
+  color: #c9d8ff;
+}
+
+.tp-offer-corner-badge--projected {
+  right: 3px;
+  border: 1px solid #6f5520;
+  background: rgba(33, 24, 7, 0.94);
+  color: #ffd56a;
+  font-size: 10px;
+}
+
 .tp-offer-remove-overlay {
   position: absolute;
   inset: 0;
@@ -178,22 +209,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   font-weight: 500;
-}
-
-.tp-offer-item-serial {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin-left: auto;
-  border: 1px solid #3d4b6b;
-  background: #1d2537;
-  border-radius: 999px;
-  padding: 1px 5px 1px;
-  font-size: 10px;
-  line-height: 1;
-  font-weight: 500;
-  font-family: inherit;
-  color: #c9d8ff;
 }
 
 .tp-offer-divider {

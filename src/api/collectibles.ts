@@ -71,7 +71,9 @@ const TRADABLE_ITEMS_MAX_PAGES = 50;
 const TRADABLE_ITEMS_RETRIES = 3;
 const RETRY_DELAY_MS = 350;
 const GET_ROLIMONS_ITEMS_MESSAGE = "trade-plus:get-rolimons-items";
-let rolimonsDefaultValueMapPromise: Promise<Map<number, number>> | null = null;
+let rolimonsItemDetailsPromise: Promise<
+    Map<number, { defaultValue: number; projected: boolean }>
+> | null = null;
 const thumbnailRequestCache = new Map<string, Promise<Map<number, string>>>();
 
 class HttpStatusError extends Error {
@@ -373,12 +375,14 @@ async function getThumbnailMapDeduped(
     return request;
 }
 
-function getDefaultValueMap(): Promise<Map<number, number>> {
-    if (rolimonsDefaultValueMapPromise) {
-        return rolimonsDefaultValueMapPromise;
+function getRolimonsItemDetails(): Promise<
+    Map<number, { defaultValue: number; projected: boolean }>
+> {
+    if (rolimonsItemDetailsPromise) {
+        return rolimonsItemDetailsPromise;
     }
 
-    rolimonsDefaultValueMapPromise = (async () => {
+    rolimonsItemDetailsPromise = (async () => {
         try {
             const raw = await new Promise<unknown>((resolve, reject) => {
                 chrome.runtime.sendMessage(
@@ -399,11 +403,15 @@ function getDefaultValueMap(): Promise<Map<number, number>> {
                 return new Map();
             }
 
-            const valueMap = new Map<number, number>();
+            const valueMap = new Map<
+                number,
+                { defaultValue: number; projected: boolean }
+            >();
 
             for (const [assetIdRaw, itemTuple] of Object.entries(data.items)) {
                 const assetId = Number.parseInt(assetIdRaw, 10);
                 const defaultValue = itemTuple?.[4];
+                const projected = itemTuple?.[7] === 1;
 
                 if (!Number.isFinite(assetId)) {
                     continue;
@@ -413,7 +421,7 @@ function getDefaultValueMap(): Promise<Map<number, number>> {
                     continue;
                 }
 
-                valueMap.set(assetId, defaultValue);
+                valueMap.set(assetId, { defaultValue, projected });
             }
 
             return valueMap;
@@ -422,7 +430,7 @@ function getDefaultValueMap(): Promise<Map<number, number>> {
         }
     })();
 
-    return rolimonsDefaultValueMapPromise;
+    return rolimonsItemDetailsPromise;
 }
 
 export async function loadUserCollectibles(
@@ -431,20 +439,25 @@ export async function loadUserCollectibles(
 ): Promise<TradeItem[]> {
     const collectibles = await getTradableItems(userId, options);
     const assetIds = collectibles.map((item) => item.assetId);
-    const [thumbnailMap, defaultValueMap] = await Promise.all([
+    const [thumbnailMap, rolimonsItemDetails] = await Promise.all([
         getThumbnailMapDeduped(assetIds, options),
-        getDefaultValueMap(),
+        getRolimonsItemDetails(),
     ]);
 
-    return collectibles.map((item) => ({
-        id: item.uniqueId,
-        assetId: item.assetId,
-        holding: item.holding,
-        serialNumber: item.serialNumber,
-        name: item.name,
-        rap: item.rap,
-        defaultValue: defaultValueMap.get(item.assetId),
-        trend: "flat",
-        thumbnailUrl: thumbnailMap.get(item.assetId),
-    }));
+    return collectibles.map((item) => {
+        const rolimonsItem = rolimonsItemDetails.get(item.assetId);
+
+        return {
+            id: item.uniqueId,
+            assetId: item.assetId,
+            holding: item.holding,
+            serialNumber: item.serialNumber,
+            name: item.name,
+            rap: item.rap,
+            defaultValue: rolimonsItem?.defaultValue,
+            projected: rolimonsItem?.projected,
+            trend: "flat",
+            thumbnailUrl: thumbnailMap.get(item.assetId),
+        };
+    });
 }

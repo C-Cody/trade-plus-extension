@@ -7,6 +7,7 @@ export type TradeItem = {
     assetId: number;
     name: string;
     serialNumber?: number;
+    projected?: boolean;
     rap: number;
     defaultValue?: number;
     trend: "up" | "down" | "flat";
@@ -51,6 +52,15 @@ export function ItemCard({ item, selected, canSelectMore, onToggle }: Props) {
                 {typeof item.serialNumber === "number" ? (
                     <span className="tp-item-star">
                         {`#${item.serialNumber}`}
+                    </span>
+                ) : null}
+                {item.projected ? (
+                    <span
+                        className="tp-item-corner-badge tp-item-corner-badge--projected"
+                        title="Projected"
+                        aria-label="Projected item"
+                    >
+                        {"\u26A0\uFE0F"}
                     </span>
                 ) : null}
                 {item.holding ? (

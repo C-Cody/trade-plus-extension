@@ -140,6 +140,28 @@
   padding-top: 2px;
 }
 
+.tp-item-corner-badge {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  min-width: 19px;
+  height: 19px;
+  padding: 0 5px;
+  border-radius: 999px;
+  border: 1px solid #6f5520;
+  background: rgba(33, 24, 7, 0.94);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  line-height: 1;
+  z-index: 2;
+}
+
+.tp-item-corner-badge--projected {
+  color: #ffd56a;
+}
+
 .tp-item-chip {
   position: absolute;
   left: 50%;
