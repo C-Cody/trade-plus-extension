@@ -6,7 +6,6 @@ Includes values display pulled from Rolimons, search items by name, ordering ite
 [![Firefox Add-on](https://img.shields.io/badge/Firefox-Addon-FF7139?logo=firefox&logoColor=white)](https://addons.mozilla.org/en-US/firefox/addon/trade-plus-for-roblox/)
 [![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-4285F4?logo=googlechrome&logoColor=white)](https://chromewebstore.google.com/detail/trade-plus-for-roblox/fiiphnjfcfjhhendfgaihogcbedaebea)\
 [![GitHub Repo](https://img.shields.io/badge/GitHub-Repository-181717?logo=github&logoColor=white)](https://github.com/C-Cody/trade-plus-extension)
-[![Discord](https://img.shields.io/badge/Discord-Server-5865F2?logo=discord&logoColor=white)](https://discord.gg/6Ju3qYdnAp)
 
 Created by Cody (tinycatsocks)/hosted by Billabob on Chrome for convenience
 
