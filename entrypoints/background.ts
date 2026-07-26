@@ -9,7 +9,7 @@ import {
 } from "../src/constants/storageKeys";
 import { targetFromUrl } from "../src/routes";
 
-const ROLIMONS_URL = "https://api.rolimons.com/items/v2/itemdetails";
+const ROLIMONS_URL = "https://api.rolimons.com/items/v3/itemdetails";
 const ROLIMONS_REFRESH_MS = 60_000;
 const GET_ROLIMONS_ITEMS_MESSAGE = "trade-plus:get-rolimons-items";
 const DEFAULT_TRADE_PLUS_ZOOM_LEVEL = 1;

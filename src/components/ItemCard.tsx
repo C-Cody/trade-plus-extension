@@ -5,6 +5,7 @@ import { RolimonsIcon } from "./icons/RolimonsIcon";
 export type TradeItem = {
     id: string;
     assetId: number;
+    itemType: "Asset" | "Bundle";
     name: string;
     serialNumber?: number;
     projected?: boolean;
@@ -14,6 +15,14 @@ export type TradeItem = {
     thumbnailUrl?: string;
     holding?: boolean;
 };
+
+export function itemDetailsUrl(item: TradeItem): string {
+    if (item.itemType === "Bundle") {
+        return `https://www.roblox.com/bundles/${item.assetId}`;
+    }
+
+    return `https://www.roblox.com/catalog/${item.assetId}`;
+}
 
 type Props = {
     item: TradeItem;
@@ -71,7 +80,7 @@ export function ItemCard({ item, selected, canSelectMore, onToggle }: Props) {
                 <h4>
                     <a
                         className="tp-item-link"
-                        href={`https://www.roblox.com/catalog/${item.assetId}`}
+                        href={itemDetailsUrl(item)}
                         target="_blank"
                         rel="noreferrer"
                     >

@@ -6,6 +6,7 @@ const ITEMS: TradeItem[] = [
     {
         id: "1",
         assetId: 1,
+        itemType: "Asset",
         name: "Alpha Hat",
         rap: 100,
         defaultValue: 500,
@@ -14,12 +15,20 @@ const ITEMS: TradeItem[] = [
     {
         id: "2",
         assetId: 2,
+        itemType: "Asset",
         name: "Beta Wings",
         rap: 300,
         trend: "flat",
         holding: true,
     },
-    { id: "3", assetId: 3, name: "Gamma Sword", rap: 200, trend: "flat" },
+    {
+        id: "3",
+        assetId: 3,
+        itemType: "Asset",
+        name: "Gamma Sword",
+        rap: 200,
+        trend: "flat",
+    },
 ];
 
 describe("inventory domain", () => {

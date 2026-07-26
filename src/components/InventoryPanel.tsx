@@ -1,7 +1,6 @@
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
     inventoryHideHoldingKey,
-    inventorySearchKey,
     inventorySortModeKey,
 } from "../constants/storageKeys";
 import { filterInventoryItems, type SortMode } from "../domain/inventory";
@@ -45,11 +44,7 @@ export function InventoryPanel({
         false,
         "boolean",
     );
-    const [searchQuery, setSearchQuery] = usePersistentValue(
-        inventorySearchKey(panelKey),
-        "",
-        "string",
-    );
+    const [searchQuery, setSearchQuery] = useState("");
     const sortMode: SortMode =
         sortModeRaw === "value-desc" ||
         sortModeRaw === "value-asc" ||
@@ -104,9 +99,7 @@ export function InventoryPanel({
                             <option value="value-desc">
                                 High to low Value
                             </option>
-                            <option value="value-asc">
-                                Low to high Value
-                            </option>
+                            <option value="value-asc">Low to high Value</option>
                             <option value="rap-desc">High to low RAP</option>
                             <option value="rap-asc">Low to high RAP</option>
                             <option value="name-asc">Name A-Z</option>

@@ -17,6 +17,7 @@ function makeItem(id: string, rap: number, holding = false): TradeItem {
     return {
         id,
         assetId: Number(id.replace(/\D/g, "")) || 1,
+        itemType: "Asset",
         name: `item-${id}`,
         rap,
         trend: "flat",

@@ -1,6 +1,8 @@
 import type { TradeItem } from "../components/ItemCard";
 import { RequestOptions } from "./types";
 
+type RobloxItemType = TradeItem["itemType"];
+
 type TradableTarget = {
     itemType?: string;
     targetId?: string;
@@ -31,7 +33,7 @@ type TradableItemsResponse = {
 
 type ThumbnailsResponse = {
     data?: Array<{
-        targetId?: number;
+        targetId?: number | string;
         imageUrl?: string | null;
     }>;
 };
@@ -46,20 +48,20 @@ type RolimonsItemTuple = [
     number,
     number,
     number,
-    number,
-    number,
 ];
 
 type RolimonsItemDetailsResponse = {
     success?: boolean;
-    items?: Record<string, RolimonsItemTuple>;
+    assets?: Record<string, RolimonsItemTuple>;
+    bundles?: Record<string, RolimonsItemTuple>;
 };
 
 type RolimonsMessageResponse = RolimonsItemDetailsResponse | null;
 
 type Collectible = {
     uniqueId: string;
-    assetId: number;
+    targetId: number;
+    itemType: RobloxItemType;
     holding: boolean;
     serialNumber?: number;
     name: string;
@@ -72,7 +74,7 @@ const TRADABLE_ITEMS_RETRIES = 3;
 const RETRY_DELAY_MS = 350;
 const GET_ROLIMONS_ITEMS_MESSAGE = "trade-plus:get-rolimons-items";
 let rolimonsItemDetailsPromise: Promise<
-    Map<number, { defaultValue: number; projected: boolean }>
+    Map<string, { defaultValue: number; projected: boolean }>
 > | null = null;
 const thumbnailRequestCache = new Map<string, Promise<Map<number, string>>>();
 
@@ -115,7 +117,9 @@ async function getJson<T>(
     return (await response.json()) as T;
 }
 
-function parseTradableItemsResponse(raw: unknown): TradableItemsResponse | null {
+function parseTradableItemsResponse(
+    raw: unknown,
+): TradableItemsResponse | null {
     const root = asRecord(raw);
     if (!root) {
         return null;
@@ -125,7 +129,8 @@ function parseTradableItemsResponse(raw: unknown): TradableItemsResponse | null 
         userId: typeof root.userId === "number" ? root.userId : undefined,
         items: Array.isArray(root.items) ? (root.items as TradableItem[]) : [],
         nextPageCursor:
-            typeof root.nextPageCursor === "string" || root.nextPageCursor === null
+            typeof root.nextPageCursor === "string" ||
+            root.nextPageCursor === null
                 ? root.nextPageCursor
                 : undefined,
     };
@@ -133,16 +138,28 @@ function parseTradableItemsResponse(raw: unknown): TradableItemsResponse | null 
 
 function parseRolimonsResponse(raw: unknown): RolimonsMessageResponse {
     const root = asRecord(raw);
-    if (!root || root.success !== true || !asRecord(root.items)) {
+    if (
+        !root ||
+        root.success !== true ||
+        !asRecord(root.assets) ||
+        !asRecord(root.bundles)
+    ) {
         return null;
     }
 
     return root as RolimonsItemDetailsResponse;
 }
 
-function thumbnailCacheKey(assetIds: number[]): string {
-    const uniqueSortedIds = [...new Set(assetIds)].sort((a, b) => a - b);
-    return uniqueSortedIds.join(",");
+function itemKey(itemType: RobloxItemType, targetId: number): string {
+    return `${itemType}:${targetId}`;
+}
+
+function thumbnailCacheKey(
+    itemType: RobloxItemType,
+    targetIds: number[],
+): string {
+    const uniqueSortedIds = [...new Set(targetIds)].sort((a, b) => a - b);
+    return `${itemType}:${uniqueSortedIds.join(",")}`;
 }
 
 async function getTradableItemsPage(
@@ -197,13 +214,17 @@ function isRetryableTradableItemsError(error: unknown): boolean {
     return error.status === 429 || (error.status >= 500 && error.status < 600);
 }
 
-function toAssetId(targetId: string | undefined): number | null {
+function toTargetId(targetId: string | undefined): number | null {
     if (!targetId) {
         return null;
     }
 
     const parsed = Number.parseInt(targetId, 10);
     return Number.isFinite(parsed) ? parsed : null;
+}
+
+function toItemType(itemType: string | undefined): RobloxItemType {
+    return itemType?.toLowerCase() === "bundle" ? "Bundle" : "Asset";
 }
 
 function toCollectibleFromInstance(
@@ -214,12 +235,15 @@ function toCollectibleFromInstance(
         return null;
     }
 
-    const assetId =
-        toAssetId(instance.itemTarget?.targetId) ??
-        toAssetId(item.itemTarget?.targetId);
-    if (assetId === null) {
+    const targetId =
+        toTargetId(instance.itemTarget?.targetId) ??
+        toTargetId(item.itemTarget?.targetId);
+    if (targetId === null) {
         return null;
     }
+    const itemType = toItemType(
+        instance.itemTarget?.itemType ?? item.itemTarget?.itemType,
+    );
 
     const name =
         (typeof instance.itemName === "string" && instance.itemName.length > 0
@@ -235,7 +259,8 @@ function toCollectibleFromInstance(
 
     return {
         uniqueId: instance.collectibleItemInstanceId,
-        assetId,
+        targetId,
+        itemType,
         holding: instance.isOnHold === true,
         serialNumber:
             typeof instance.serialNumber === "number"
@@ -311,31 +336,41 @@ async function getTradableItems(
 }
 
 async function getThumbnailMap(
-    assetIds: number[],
+    itemType: RobloxItemType,
+    targetIds: number[],
     options: RequestOptions = {},
 ): Promise<Map<number, string>> {
-    if (!assetIds.length) {
+    if (!targetIds.length) {
         return new Map();
     }
 
     const map = new Map<number, string>();
     const chunkSize = 60;
 
-    for (let i = 0; i < assetIds.length; i += chunkSize) {
-        const chunk = assetIds.slice(i, i + chunkSize);
+    for (let i = 0; i < targetIds.length; i += chunkSize) {
+        const chunk = targetIds.slice(i, i + chunkSize);
         const joinedIds = chunk.join(",");
+        const isBundle = itemType === "Bundle";
+        const path = isBundle ? "bundles/thumbnails" : "assets";
+        const idParameter = isBundle ? "bundleIds" : "assetIds";
+        const returnPolicy = isBundle ? "" : "&returnPolicy=PlaceHolder";
+        const thumbnailSize = isBundle ? "420x420" : "250x250";
         const data = await getJson<ThumbnailsResponse>(
-            `https://thumbnails.roblox.com/v1/assets?assetIds=${joinedIds}&size=250x250&format=Png&isCircular=false&returnPolicy=PlaceHolder`,
+            `https://thumbnails.roblox.com/v1/${path}?${idParameter}=${joinedIds}&size=${thumbnailSize}&format=Png&isCircular=false${returnPolicy}`,
             options,
         );
 
         for (const entry of data?.data ?? []) {
+            const targetId =
+                typeof entry.targetId === "number"
+                    ? entry.targetId
+                    : toTargetId(entry.targetId);
             if (
-                typeof entry.targetId === "number" &&
+                targetId !== null &&
                 typeof entry.imageUrl === "string" &&
                 entry.imageUrl.length > 0
             ) {
-                map.set(entry.targetId, entry.imageUrl);
+                map.set(targetId, entry.imageUrl);
             }
         }
     }
@@ -344,20 +379,21 @@ async function getThumbnailMap(
 }
 
 async function getThumbnailMapDeduped(
-    assetIds: number[],
+    itemType: RobloxItemType,
+    targetIds: number[],
     options: RequestOptions = {},
 ): Promise<Map<number, string>> {
-    if (!assetIds.length) {
+    if (!targetIds.length) {
         return new Map();
     }
 
-    const cacheKey = thumbnailCacheKey(assetIds);
+    const cacheKey = thumbnailCacheKey(itemType, targetIds);
     const existing = thumbnailRequestCache.get(cacheKey);
     if (existing) {
         return existing;
     }
 
-    const request = getThumbnailMap(assetIds, options)
+    const request = getThumbnailMap(itemType, targetIds, options)
         .then((map) => {
             return map;
         })
@@ -376,7 +412,7 @@ async function getThumbnailMapDeduped(
 }
 
 function getRolimonsItemDetails(): Promise<
-    Map<number, { defaultValue: number; projected: boolean }>
+    Map<string, { defaultValue: number; projected: boolean }>
 > {
     if (rolimonsItemDetailsPromise) {
         return rolimonsItemDetailsPromise;
@@ -399,29 +435,41 @@ function getRolimonsItemDetails(): Promise<
             });
             const data = parseRolimonsResponse(raw);
 
-            if (!data?.success || !data.items) {
+            if (!data?.success || !data.assets || !data.bundles) {
                 return new Map();
             }
 
             const valueMap = new Map<
-                number,
+                string,
                 { defaultValue: number; projected: boolean }
             >();
 
-            for (const [assetIdRaw, itemTuple] of Object.entries(data.items)) {
-                const assetId = Number.parseInt(assetIdRaw, 10);
-                const defaultValue = itemTuple?.[4];
-                const projected = itemTuple?.[7] === 1;
+            const collections: Array<
+                [RobloxItemType, Record<string, RolimonsItemTuple>]
+            > = [
+                ["Asset", data.assets],
+                ["Bundle", data.bundles],
+            ];
 
-                if (!Number.isFinite(assetId)) {
-                    continue;
+            for (const [itemType, items] of collections) {
+                for (const [targetIdRaw, itemTuple] of Object.entries(items)) {
+                    const targetId = Number.parseInt(targetIdRaw, 10);
+                    const defaultValue = itemTuple?.[4];
+                    const projected = itemTuple?.[7] === 1;
+
+                    if (!Number.isFinite(targetId)) {
+                        continue;
+                    }
+
+                    if (typeof defaultValue !== "number" || defaultValue <= 0) {
+                        continue;
+                    }
+
+                    valueMap.set(itemKey(itemType, targetId), {
+                        defaultValue,
+                        projected,
+                    });
                 }
-
-                if (typeof defaultValue !== "number" || defaultValue <= 0) {
-                    continue;
-                }
-
-                valueMap.set(assetId, { defaultValue, projected });
             }
 
             return valueMap;
@@ -438,18 +486,30 @@ export async function loadUserCollectibles(
     options: RequestOptions = {},
 ): Promise<TradeItem[]> {
     const collectibles = await getTradableItems(userId, options);
-    const assetIds = collectibles.map((item) => item.assetId);
-    const [thumbnailMap, rolimonsItemDetails] = await Promise.all([
-        getThumbnailMapDeduped(assetIds, options),
-        getRolimonsItemDetails(),
-    ]);
+    const assetIds = collectibles
+        .filter((item) => item.itemType === "Asset")
+        .map((item) => item.targetId);
+    const bundleIds = collectibles
+        .filter((item) => item.itemType === "Bundle")
+        .map((item) => item.targetId);
+    const [assetThumbnailMap, bundleThumbnailMap, rolimonsItemDetails] =
+        await Promise.all([
+            getThumbnailMapDeduped("Asset", assetIds, options),
+            getThumbnailMapDeduped("Bundle", bundleIds, options),
+            getRolimonsItemDetails(),
+        ]);
 
     return collectibles.map((item) => {
-        const rolimonsItem = rolimonsItemDetails.get(item.assetId);
+        const rolimonsItem = rolimonsItemDetails.get(
+            itemKey(item.itemType, item.targetId),
+        );
+        const thumbnailMap =
+            item.itemType === "Bundle" ? bundleThumbnailMap : assetThumbnailMap;
 
         return {
             id: item.uniqueId,
-            assetId: item.assetId,
+            assetId: item.targetId,
+            itemType: item.itemType,
             holding: item.holding,
             serialNumber: item.serialNumber,
             name: item.name,
@@ -457,7 +517,7 @@ export async function loadUserCollectibles(
             defaultValue: rolimonsItem?.defaultValue,
             projected: rolimonsItem?.projected,
             trend: "flat",
-            thumbnailUrl: thumbnailMap.get(item.assetId),
+            thumbnailUrl: thumbnailMap.get(item.targetId),
         };
     });
 }
