@@ -25,7 +25,7 @@ and upload the generated zip files in .output/ to Chrome/Firefox
 
 ### Version releases
 
-- 1.1.3 - Added limited bundle values, images, and trading support; inventory searches now reset between trade pages
+- 0.1.4 - Added limited bundle values, images, and trading support; inventory searches now reset between trade pages
 - 1.1.2 - Independent zooming functionality from the rest of roblox website
 - 1.1.1 - Manifest name change
 - 1.1.0 - Initial release
