@@ -84,6 +84,56 @@ describe("sendTrade", () => {
         expect(secondHeaders["x-csrf-token"]).toBe("token-1");
     });
 
+    it("recognizes a counter 2fa challenge with a generic error message", async () => {
+        const metadata = btoa(
+            JSON.stringify({
+                challengeId: "metadata-challenge-1",
+                actionType: "Generic",
+            }),
+        );
+        const fetchMock = vi
+            .spyOn(globalThis, "fetch")
+            .mockResolvedValueOnce(
+                response(
+                    403,
+                    {
+                        errors: [{ code: 0, message: "XSRF token invalid" }],
+                    },
+                    {
+                        "x-csrf-token": "refreshed-csrf-token",
+                    },
+                ),
+            )
+            .mockResolvedValueOnce(
+                response(
+                    403,
+                    {
+                        errors: [
+                            { code: 0, message: "An unknown error occured." },
+                        ],
+                    },
+                    {
+                        "rblx-challenge-id": "header-challenge-1",
+                        "rblx-challenge-type": "twostepverification",
+                        "rblx-challenge-metadata": metadata,
+                    },
+                ),
+            );
+
+        await expect(
+            sendTrade(PAYLOAD, { counterTradeId: "555" }),
+        ).rejects.toMatchObject({
+            name: "TradeChallengeRequiredError",
+            challenge: {
+                headerChallengeId: "header-challenge-1",
+                metadataChallengeId: "metadata-challenge-1",
+                actionType: "Generic",
+            },
+            csrfToken: "refreshed-csrf-token",
+        });
+        expect(fetchMock).toHaveBeenCalledTimes(2);
+    });
+
     it("throws TradeChallengeRequiredError when challenge headers are present", async () => {
         const metadata = btoa(
             JSON.stringify({
@@ -98,6 +148,7 @@ describe("sendTrade", () => {
                 [{ message: "Challenge is required to authorize the request" }],
                 {
                     "rblx-challenge-id": "header-1",
+                    "rblx-challenge-type": "twostepverification",
                     "rblx-challenge-metadata": metadata,
                     "x-csrf-token": "token-2",
                 },
@@ -117,7 +168,7 @@ describe("sendTrade", () => {
         await expect(sendTrade(PAYLOAD)).rejects.toThrow("Bad trade payload");
     });
 
-    it("does not treat challenge headers as 2fa flow without challenge-like message", async () => {
+    it("does not treat incomplete challenge headers as 2fa", async () => {
         const metadata = btoa(
             JSON.stringify({
                 challengeId: "meta-2",
@@ -164,6 +215,7 @@ describe("sendTrade", () => {
                 [{ message: "Challenge is required to authorize the request" }],
                 {
                     "rblx-challenge-id": "header-3",
+                    "rblx-challenge-type": "twostepverification",
                     "rblx-challenge-metadata": metadata,
                     "x-csrf-token": "csrf-from-header",
                 },

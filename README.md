@@ -25,10 +25,12 @@ and upload the generated zip files in .output/ to Chrome/Firefox
 
 ### Version releases
 
+- 0.1.5 - Fixed counter-trade two-step verification challenge detection
 - 0.1.4 - Added limited bundle values, images, and trading support; inventory searches now reset between trade pages
-- 1.1.2 - Independent zooming functionality from the rest of roblox website
-- 1.1.1 - Manifest name change
-- 1.1.0 - Initial release
+- 0.1.3 - Added projected value signals
+- 0.1.2 - Independent zooming functionality from the rest of Roblox website
+- 0.1.1 - Manifest name change
+- 0.1.0 - Initial release
 
 ### Firefox mobile support
 

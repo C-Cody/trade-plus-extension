@@ -48,6 +48,7 @@ describe("parseChallengeFromHeaders", () => {
             status: 403,
             headers: {
                 "rblx-challenge-id": "header-1",
+                "rblx-challenge-type": "twostepverification",
                 "rblx-challenge-metadata": "%%%invalid%%%",
             },
         });
@@ -59,9 +60,27 @@ describe("parseChallengeFromHeaders", () => {
             status: 403,
             headers: {
                 "rblx-challenge-id": "header-1",
+                "rblx-challenge-type": "twostepverification",
                 "rblx-challenge-metadata": btoa(
                     JSON.stringify({
                         challengeId: "meta-1",
+                    }),
+                ),
+            },
+        });
+        expect(parseChallengeFromHeaders(res)).toBeNull();
+    });
+
+    it("returns null for unsupported challenge types", () => {
+        const res = new Response("{}", {
+            status: 403,
+            headers: {
+                "rblx-challenge-id": "header-1",
+                "rblx-challenge-type": "captcha",
+                "rblx-challenge-metadata": btoa(
+                    JSON.stringify({
+                        challengeId: "meta-1",
+                        actionType: "ItemTrade",
                     }),
                 ),
             },
@@ -74,6 +93,7 @@ describe("parseChallengeFromHeaders", () => {
             status: 403,
             headers: {
                 "rblx-challenge-id": "header-1",
+                "rblx-challenge-type": "twostepverification",
                 "rblx-challenge-metadata": btoa(
                     JSON.stringify({
                         challengeId: "meta-1",

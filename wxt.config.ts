@@ -59,7 +59,7 @@ export default defineConfig({
     manifest: ({ manifestVersion }) => ({
         name: "Trade Plus for Roblox",
         description: "Replaces Roblox trade page with an improved one.",
-        version: "0.1.4",
+        version: "0.1.5",
         icons: ICONS,
         ...(manifestVersion === 3
             ? {

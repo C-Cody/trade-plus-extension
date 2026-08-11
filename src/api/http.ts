@@ -49,9 +49,14 @@ export function parseRobloxErrorMessage(data: unknown): string | null {
 
 export function parseChallengeFromHeaders(res: Response): TradeChallenge | null {
     const headerChallengeId = res.headers.get("rblx-challenge-id");
+    const challengeType = res.headers.get("rblx-challenge-type");
     const metadataBase64 = res.headers.get("rblx-challenge-metadata");
 
-    if (!headerChallengeId || !metadataBase64) {
+    if (
+        !headerChallengeId ||
+        challengeType?.toLowerCase() !== "twostepverification" ||
+        !metadataBase64
+    ) {
         return null;
     }
 

@@ -227,10 +227,7 @@ export async function sendTrade(
 
     const parsedChallenge = parseChallengeFromHeaders(res);
     const headerCsrfToken = res.headers.get("x-csrf-token");
-    const challengeMessage =
-        message.toLowerCase().includes("challenge") ||
-        message.toLowerCase().includes("two-step");
-    if (parsedChallenge && challengeMessage) {
+    if (parsedChallenge) {
         throw new TradeChallengeRequiredError(
             parsedChallenge,
             message,
